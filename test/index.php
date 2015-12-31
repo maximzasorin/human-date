@@ -4,8 +4,8 @@
 
 	include(__DIR__ . '/../humandate.php');
 
-	$humanDate = new HumanDate(null, 'ru');
+	$humanDate = new HumanDate('Europe/London', 'ru');
 
-	print $humanDate->format('-23 days 1 hours -46 seconds');
+	print $humanDate->format('-1 hours -46 seconds');
 
 

@@ -1,31 +1,38 @@
 <?php
 
-	// TODO: Учитывать временную зону
-	// TODO: Пересмотреть разделение на _differenceDate и _beautyDate
+	// TODO: Join _differenceDate and _beautyDate
+	// TODO: properties $secondsPerMinute, ...
 
 	/**
 	* Class for format date (like VK.com)
 	*
 	*/
 	class HumanDate {
-		protected $_secondsPerMinute = 60;
-		protected $_secondsPerHour = 3600;
-		// protected $_secondsPerDay = 86400;
-		// protected $_secondsPerMonth = 2592000;
-		protected $_secondsPerYear = 31104000;
+		protected $secondsPerMinute = 60;
+		protected $secondsPerHour = 3600;
+		// protected $secondsPerDay = 86400;
+		// protected $secondsPerMonth = 2592000;
+		protected $secondsPerYear = 31104000;
 
-		protected $_timezone;
-		protected $_lang;
+		protected $timezone;
+		protected $lang;
 
 		/**
 		* Create new object
 		*
 		*/
 		public function __construct($timezone = null, $lang = 'en') {
-			$this->_timezone = $timezone;
-			$this->_lang = $lang;
+			if ($timezone) {
+				$this->timezone = new DateTimeZone($timezone);
+			}
 
-			$this->_loadTranslations();
+			$this->lang = $lang;
+
+			if (!file_exists($this->langFile())) {
+				$this->lang = 'en';
+			}
+
+			$this->loadTranslations();
 		}
 
 		/**
@@ -35,126 +42,129 @@
 		* @return string
 		*/
 		public function format($date) {
-			if (!is_numeric($date)) {
-				$date = strtotime($date);
+			if (!($date instanceof DateTime)) {
+				$date = new DateTime($date, $this->timezone);
 			}
 
-			$difference = strtotime('now') - $date;
+			$now = new DateTime('now', $this->timezone);
 
-			$past = $difference < 0 ? false : true;
-			$difference = abs($difference);
+			$difference = $now->getTimestamp() - $date->getTimestamp();
 
-			if ($difference >= $this->_secondsPerHour * 4 + $this->_secondsPerMinute * 45) {
-				$humanDate = $this->_beautyDate($date);
+			if (abs($difference) >= $this->secondsPerHour * 4 + $this->secondsPerMinute * 45 + 45) {
+				$humanDate = $this->beautyDate($date);
 			} else {
-				$humanDate = $this->_differenceDate($difference, $past);
+				$humanDate = $this->differenceDate($difference);
 			}
 
 			return $humanDate;
 		}
 
-		protected function _beautyDate($date) {
-			$yesterday = strtotime('-1 day');
-			$tomorrow = strtotime('+1 day');
-
-			// Day and month
-			if (strftime('%d.%m.%y') == strftime('%d.%m.%y', $date)) {
-				$beautyDate = $this->_translation('today');
-			} elseif (strftime('%d.%m.%y', $yesterday) == strftime('%d.%m.%y', $date)) {
-				$beautyDate = $this->_translation('yesterday');
-			} elseif (strftime('%d.%m.%y', $tomorrow) == strftime('%d.%m.%y', $date)) {
-				$beautyDate = $this->_translation('tomorrow');
+		public function beautyDate($date, $shortMonths = true) {
+			// Simple date
+			if ($this->isToday($date)) {
+				$beautyDate = $this->translation('today');
+			} elseif ($this->isYesterday($date)) {
+				$beautyDate = $this->translation('yesterday');
+			} elseif ($this->isTomorrow($date)) {
+				$beautyDate = $this->translation('tomorrow');
 			} else {
 				// Day
-				$beautyDate = strftime('%d', $date);
+				$beautyDate = $date->format('j');
 
 				// Month
-				$month = strftime('%m', $date);
-				$beautyDate .= ' ' . $this->_translation('shortMonths', $month - 1);
+				$month = $date->format('m');
+
+				if ($shortMonths) {
+					$beautyDate .= ' ' . $this->translation('shortMonths', $month - 1);
+				} else {
+					$beautyDate .= ' ' . $this->translation('months', $month - 1);
+				}
 
 				// Year
-				if (strtotime('now') - $date > $this->_secondsPerYear) {
-					$beautyDate .= ' ' . strftime('%y', $date);
+				if ($this->now()->getTimestamp() - $date->getTimestamp() > $this->secondsPerYear) {
+					$beautyDate .= ' ' . $date->format('Y');
 				}
 			}
 
 			// Time
-			$beautyDate .= ' ' . $this->_translation('delimiter');
-			$beautyDate .= ' ' . strftime($this->_translation('time'), $date);
+			$beautyDate .= ' ' . $this->translation('delimiter');
+			$beautyDate .= ' ' . $date->format($this->translation('time'));
 
 			return $beautyDate;
 		}
 
-		protected function _differenceDate($difference, $past) {
+		protected function differenceDate($difference) {
+			$differenceAbs = abs($difference);
+
 			// less than 5 seconds
-			if ($difference <= 5)
+			if ($differenceAbs <= 5)
 			{
-				if ($past) {
-					$differenceDate = $this->_translation('justNow');
+				if ($difference > 0) {
+					$differenceDate = $this->translation('justNow');
 				} else {
-					$differenceDate = $this->_translation('rightNow');
+					$differenceDate = $this->translation('rightNow');
 				}
 			}
 			// from 5 to 45 sec
-			elseif ($difference <= 45)
+			elseif ($differenceAbs <= 45)
 			{
-				$differenceDate = $this->_declension('seconds', $difference);
+				$differenceDate = $this->declension('seconds', $difference);
 			}
 			// from 45 sec to 1 min 45 sec
-			elseif ($difference <= 1 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 1 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('oneMinute');
+				$differenceDate = $this->translation('oneMinute');
 			}
 			// from 1 min 45 sec to 2 min 45 sec
-			elseif ($difference <= 2 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 2 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('twoMinutes');
+				$differenceDate = $this->translation('twoMinutes');
 			}
 			// from 2 min 45 sec to 3 min 45 sec
-			elseif ($difference <= 3 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 3 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('threeMinutes');
+				$differenceDate = $this->translation('threeMinutes');
 			}
 			// from 3 min 45 sec to 4 min 45 sec
-			elseif ($difference <= 4 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 4 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('fourMinutes');
+				$differenceDate = $this->translation('fourMinutes');
 			}
 			// from 4 min 45 sec to 45 min 45 sec
-			elseif ($difference <= 45 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 45 * $this->secondsPerMinute + 45)
 			{
-				$minutes = round($difference / $this->_secondsPerMinute);
-				$differenceDate = $this->_declension('minutes', $minutes);
+				$minutes = round($differenceAbs / $this->secondsPerMinute);
+				$differenceDate = $this->declension('minutes', $minutes);
 			}
 			// from 45 min 46 sec to 1 hour 45 min 45 sec
-			elseif ($difference <= 1 * $this->_secondsPerHour + 45 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 1 * $this->secondsPerHour + 45 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('oneHour');
+				$differenceDate = $this->translation('oneHour');
 			}
-			elseif ($difference <= 2 * $this->_secondsPerHour + 45 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 2 * $this->secondsPerHour + 45 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('twoHours');
+				$differenceDate = $this->translation('twoHours');
 			}
-			elseif ($difference <= 3 * $this->_secondsPerHour + 45 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 3 * $this->secondsPerHour + 45 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('threeHours');
+				$differenceDate = $this->translation('threeHours');
 			}
-			elseif ($difference <= 4 * $this->_secondsPerHour + 45 * $this->_secondsPerMinute + 45)
+			elseif ($differenceAbs <= 4 * $this->secondsPerHour + 45 * $this->secondsPerMinute + 45)
 			{
-				$differenceDate = $this->_translation('fourHours');
+				$differenceDate = $this->translation('fourHours');
 			}
 
 			// Add ago or after word
 			if (
-					$differenceDate != $this->_translation('justNow')
+					$differenceDate != $this->translation('justNow')
 					&&
-					$differenceDate != $this->_translation('rightNow')
+					$differenceDate != $this->translation('rightNow')
 				)
 			{
-				if ($past) {
-					$differenceDate .= ' ' . $this->_translation('ago');
+				if ($difference > 0) {
+					$differenceDate .= ' ' . $this->translation('ago');
 				} else {
-					$differenceDate = $this->_translation('after') . ' ' . $differenceDate;
+					$differenceDate = $this->translation('after') . ' ' . $differenceDate;
 				}
 			}
 
@@ -162,30 +172,84 @@
 		}
 
 		/**
+		* Return now DateTime
+		*
+		* @return object
+		*/
+		protected function now() {
+			return new DateTime('now', $this->timezone);
+		}
+
+		/**
+		* Return true if the date is today
+		*
+		* @return boolean
+		*/
+		protected function isToday($date) {
+			$now = $this->now();
+
+			return $now->format('d.m.Y') == $date->format('d.m.Y');
+		}
+
+		/**
+		* Return true if the date is yesterday
+		*
+		* @return boolean
+		*/
+		protected function isYesterday($date) {
+			$yesterday = $this->now()->modify('-1 day');
+
+			return $yesterday->format('d.m.Y') == $date->format('d.m.Y');
+		}
+
+		/**
+		* Return true if the date is tomorrow
+		*
+		* @return boolean
+		*/
+		protected function isTomorrow($date) {
+			$tomorrow = $this->now()->modify('-1 day');
+
+			return $tomorrow->format('d.m.Y') == $date->format('d.m.Y');
+		}
+
+		/**
 		* Return word from translation file
 		*
+		* @return string
 		*/
-		protected function _translation($label, $index = null) {
+		protected function translation($label, $index = null) {
 			if ($index === null) {
 				$index = 0;
 			}
 
-			if (is_array($this->_translations[$label])) {
-				return $this->_translations[$label][$index];
+			if (is_array($this->translations[$label])) {
+				return $this->translations[$label][$index];
 			} else {
-				return $this->_translations[$label];
+				return $this->translations[$label];
 			}
 		}
 
 		/**
 		* 
 		*
+		* 
+		* @return string
 		*/
-		protected function _declension($label, $number) {
-			$declension = $this->_translation('declension');
+		protected function declension($label, $number) {
+			$declension = $this->translation('declension');
 			$index = $declension($number);
 
-			return $number . ' ' . $this->_translation($label, $index);
+			return $number . ' ' . $this->translation($label, $index);
+		}
+
+		/**
+		* Return path for lang file
+		*
+		* @return string
+		*/
+		protected function langFile() {
+			return __DIR__ . '/lang/' . $this->lang . '.php';
 		}
 
 		/**
@@ -193,7 +257,7 @@
 		*
 		* @return void
 		*/
-		protected function _loadTranslations() {
-			$this->_translations = require_once(__DIR__ . '/lang/' . $this->_lang . '.php');
+		protected function loadTranslations() {
+			$this->translations = require_once($this->langFile());
 		}
 	}
