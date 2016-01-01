@@ -5,8 +5,8 @@
 	*
 	*/
 	return [
-		'shortMonths' => ['jun', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sen', 'oct', 'nov', 'dec'],
-		'time' => 'j:i a',
+		'shortMonths' => [ 'Jun', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sen', 'Oct', 'Nov', 'Dec'],
+		'time' => 'g:i a',
 
 		'justNow' => 'just now', // Past
 		'rightNow' => 'right now', // Future
