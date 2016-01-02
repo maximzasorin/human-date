@@ -11,7 +11,7 @@
 		'justNow' => 'just now', // Past
 		'rightNow' => 'right now', // Future
 		'seconds' => 'seconds',
-		'oneMinute' => 'minute',
+		'oneMinute' => 'one minute',
 		'twoMinutes' => 'two minutes',
 		'threeMinutes' => 'three minutes',
 		'fourMinutes' => 'four minutes',
@@ -27,9 +27,5 @@
 		
 		'ago' => 'ago',
 		'after' => 'in a',
-		'delimiter' => 'at',
-
-		'declension' => function($number) {
-			return 0;
-		}
+		'delimiter' => 'at'
 	];

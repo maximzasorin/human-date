@@ -1,7 +1,5 @@
 <?php
 
-	// TODO: Join _differenceDate and _beauty
-
 	/**
 	* Class for format date (like VK.com)
 	*
@@ -9,16 +7,21 @@
 	class HumanDate {
 		protected $timezone;
 		protected $lang;
+		protected $translations;
+
+		protected $now;
 
 		/**
 		* Create new object
 		* 
-		* @param string $timezone
+		* @param mixed $timezone DateTimeZone or string
 		* @param string $lang
 		*/
-		public function __construct($timezone = null, $lang = 'en') {
-			if ($timezone) {
+		public function __construct($timezone = 'UTC', $lang = 'en') {
+			if (!($timezone instanceof DateTimeZone)) {
 				$this->timezone = new DateTimeZone($timezone);
+			} else {
+				$this->timezone = $timezone;
 			}
 
 			$this->lang = $lang;
@@ -33,41 +36,38 @@
 		/**
 		* Format date for humans
 		*
-		* @param mixed $date
+		* @param mixed $date DateTime, integer or string
+		* @param DateTime $now
 		* @return string
 		*/
-		public function format($date) {
-			if (!($date instanceof DateTime)) {
-				if (is_numeric($date)) {
-					$dateObject = new DateTime('now', $this->timezone);
-					$date = $dateObject->setTimestamp($date);
-				} else {
-					$date = new DateTime($date, $this->timezone);
-				}
-			}
+		public function format($date, $now = 'now') {
+			$date = $this->createDate($date);
+			$this->now = $this->createDate($now);
 
-			if ($this->difference($date) > 4 * $this->hour() + 45 * $this->minute() + 45) {
+			if ($this->distance($date) > 4 * $this->hour() + 45 * $this->minute() + 45) {
 				$humanDate = $this->beauty($date);
 			} else {
-				$humanDate = $this->timeDifference($date);
+				$humanDate = $this->words($date);
 			}
 
 			return $humanDate;
 		}
 
 		/**
-		* 
+		* Return date in beauty format
 		*
 		* @param DateTime $date
 		* @param boolean $shortMonths
 		*/
 		protected function beauty($date, $shortMonths = true) {
+			$tomorrow = $this->isTomorrow($date);
+
 			// Simple date
 			if ($this->isToday($date)) {
 				$beauty = $this->translation('today');
 			} elseif ($this->isYesterday($date)) {
 				$beauty = $this->translation('yesterday');
-			} elseif ($this->isTomorrow($date)) {
+			} elseif ($tomorrow) {
 				$beauty = $this->translation('tomorrow');
 			} else {
 				// Day
@@ -83,7 +83,7 @@
 				}
 
 				// Year
-				if ($this->difference($date) > $this->year()) {
+				if ($this->distance($date) > $this->year()) {
 					$beauty .= ' ' . $date->format('y');
 				}
 			}
@@ -96,72 +96,74 @@
 		}
 
 		/**
-		* 
+		* Return date in words
+		*
+		* Work for date from 0 seconds to 4 hours 45 minutes 45 seconds
 		*
 		* @param DateTime $date
 		* @return string
 		*/
-		protected function timeDifference($date) {
-			$difference = $this->difference($date);
+		protected function words($date) {
+			$distance = $this->distance($date);
 
-			if ($difference < 5)
+			if ($distance < 5)
 			{
 				if ($this->isPast($date)) {
-					$timeDifference = $this->translation('justNow');
+					$words = $this->translation('justNow');
 				} else {
-					$timeDifference = $this->translation('rightNow');
+					$words = $this->translation('rightNow');
 				}
 			} else {
-				if ($difference < 45)
+				if ($distance < 45)
 				{
-					$timeDifference = $this->declension('seconds', $difference);
+					$words = $this->declension('seconds', $distance);
 				}
-				elseif ($difference < 1 * $this->minute() + 45)
+				elseif ($distance < 1 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('oneMinute');
+					$words = $this->translation('oneMinute');
 				}
-				elseif ($difference < 2 * $this->minute() + 45)
+				elseif ($distance < 2 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('twoMinutes');
+					$words = $this->translation('twoMinutes');
 				}
-				elseif ($difference < 3 * $this->minute() + 45)
+				elseif ($distance < 3 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('threeMinutes');
+					$words = $this->translation('threeMinutes');
 				}
-				elseif ($difference < 4 * $this->minute() + 45)
+				elseif ($distance < 4 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('fourMinutes');
+					$words = $this->translation('fourMinutes');
 				}
-				elseif ($difference < 45 * $this->minute() + 45)
+				elseif ($distance < 45 * $this->minute() + 45)
 				{
-					$minutes = round($difference / $this->minute());
-					$timeDifference = $this->declension('minutes', $minutes);
+					$minutes = round($distance / $this->minute());
+					$words = $this->declension('minutes', $minutes);
 				}
-				elseif ($difference < 1 * $this->hour() + 45 * $this->minute() + 45)
+				elseif ($distance < 1 * $this->hour() + 45 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('oneHour');
+					$words = $this->translation('oneHour');
 				}
-				elseif ($difference < 2 * $this->hour() + 45 * $this->minute() + 45)
+				elseif ($distance < 2 * $this->hour() + 45 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('twoHours');
+					$words = $this->translation('twoHours');
 				}
-				elseif ($difference < 3 * $this->hour() + 45 * $this->minute() + 45)
+				elseif ($distance < 3 * $this->hour() + 45 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('threeHours');
+					$words = $this->translation('threeHours');
 				}
-				elseif ($difference < 4 * $this->hour() + 45 * $this->minute() + 45)
+				elseif ($distance <= 4 * $this->hour() + 45 * $this->minute() + 45)
 				{
-					$timeDifference = $this->translation('fourHours');
+					$words = $this->translation('fourHours');
 				}
 
 				if ($this->isPast($date)) {
-					$timeDifference .= ' ' . $this->translation('ago');
+					$words .= ' ' . $this->translation('ago');
 				} else {
-					$timeDifference = $this->translation('after') . ' ' . $timeDifference;
+					$words = $this->translation('after') . ' ' . $words;
 				}
 			}
 
-			return $timeDifference;
+			return $words;
 		}
 
 		/**
@@ -170,7 +172,7 @@
 		* @param DateTime $date
 		* @return integer
 		*/
-		protected function difference($date) {
+		protected function distance($date) {
 			return abs($this->now()->getTimestamp() - $date->getTimestamp());
 		}
 
@@ -204,16 +206,37 @@
 		/**
 		* Return now DateTime
 		*
-		* @return object
+		* @return DateTime
 		*/
 		protected function now() {
-			return new DateTime('now', $this->timezone);
+			return clone $this->now;
+		}
+
+		/**
+		* Create DateTime object from another types
+		*
+		* @param mixed $date DateTime, integer or string
+		* @return DateTime
+		*/
+		protected function createDate($date) {
+			if (!($date instanceof DateTime)) {
+				if (is_numeric($date)) {
+					$now = new DateTime('now', $this->timezone);
+					$date = $now->setTimestamp($date);
+				} else {
+					$date = new DateTime($date, $this->timezone);
+				}
+			} else {
+				$date = clone $date;
+			}
+
+			return $date;
 		}
 
 		/**
 		* Return true if the date is today
 		*
-		* @param object $date
+		* @param DateTime $date
 		* @return boolean
 		*/
 		protected function isToday($date) {
@@ -225,7 +248,7 @@
 		/**
 		* Return true if the date is yesterday
 		*
-		* @param object $date
+		* @param DateTime $date
 		* @return boolean
 		*/
 		protected function isYesterday($date) {
@@ -237,11 +260,11 @@
 		/**
 		* Return true if the date is tomorrow
 		*
-		* @param object $date
+		* @param DateTime $date
 		* @return boolean
 		*/
 		protected function isTomorrow($date) {
-			$tomorrow = $this->now()->modify('-1 day');
+			$tomorrow = $this->now()->modify('+1 day');
 
 			return $tomorrow->format('d.m.Y') == $date->format('d.m.Y');
 		}
@@ -249,7 +272,7 @@
 		/**
 		* Return true if the date is passed
 		*
-		* @param object $date
+		* @param DateTime $date
 		* @return boolean
 		*/
 		protected function isPast($date) {
@@ -264,6 +287,10 @@
 		* @return string
 		*/
 		protected function translation($label, $index = 0) {
+			if (!array_key_exists($label, $this->translations)) {
+				return '';
+			}
+
 			if (is_array($this->translations[$label])) {
 				return $this->translations[$label][$index];
 			} else {
@@ -272,15 +299,20 @@
 		}
 
 		/**
-		* 
+		* Make declension for the world
 		*
 		* @param string $label
 		* @param integer $number
 		* @return string
 		*/
 		protected function declension($label, $number) {
-			$declension = $this->translation('declension');
-			$index = $declension($number);
+			$declensionFunc = $this->translation('declension');
+
+			if ($declensionFunc) {
+				$index = $declensionFunc($number);
+			} else {
+				$index = 0;
+			}
 
 			return $number . ' ' . $this->translation($label, $index);
 		}
@@ -300,6 +332,6 @@
 		* @return void
 		*/
 		protected function loadTranslations() {
-			$this->translations = require_once($this->langFile());
+			$this->translations = require($this->langFile());
 		}
 	}
