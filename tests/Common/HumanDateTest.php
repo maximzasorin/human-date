@@ -1,6 +1,8 @@
 <?php
 
-	require_once(__DIR__ . '/../src/humandate.php');
+	namespace OneLetter\Tests\Common;
+
+	use OneLetter\Common\HumanDate;
 
 	class HumanDateTest extends \PHPUnit_Framework_TestCase {
 		private $timezone;
@@ -8,22 +10,22 @@
 		private $humanDate;
 
 		public function setUp() {
-			$this->timezone = new DateTimeZone('UTC');
+			$this->timezone = new \DateTimeZone('UTC');
 			$this->lang = 'en';
 
 			$this->humanDate = new HumanDate($this->timezone, $this->lang);
 		}
 
 		/**
-		* Test for DateTime, timestamps and strings
+		* Test for \DateTime, timestamps and strings
 		*
 		* @param string $date
 		* @param string $now
 		* @param string $expectedDate
 		*/
 		public function assertDateToFormat($date, $now, $expectedDate) {			
-			$dateObject = new DateTime($date, $this->timezone);
-			$nowObject = new DateTime($now, $this->timezone);
+			$dateObject = new \DateTime($date, $this->timezone);
+			$nowObject = new \DateTime($now, $this->timezone);
 
 			$dateTimestamp = $dateObject->getTimestamp();
 			$nowTimestamp = $nowObject->getTimestamp();
@@ -38,7 +40,7 @@
 		}
 
 		public function testWithoutSetNow() {
-			$date = new DateTime('-6 seconds');
+			$date = new \DateTime('-6 seconds');
 
 			$formattedDate = $this->humanDate->format($date);
 			$expectedDate = '6 seconds ago';
@@ -47,7 +49,7 @@
 		}
 
 		public function testWithoutTimezoneAndLanguage() {
-			$date = new DateTime('-6 seconds');
+			$date = new \DateTime('-6 seconds');
 			$humanDate = new HumanDate;
 
 			$formattedDate = $humanDate->format($date);

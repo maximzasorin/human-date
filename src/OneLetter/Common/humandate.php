@@ -1,5 +1,7 @@
 <?php
 
+	namespace OneLetter\Common;
+
 	/**
 	* Class for format date (like VK.com)
 	*
@@ -14,12 +16,12 @@
 		/**
 		* Create new object
 		* 
-		* @param mixed $timezone DateTimeZone or string
+		* @param mixed $timezone \DateTimeZone or string
 		* @param string $lang
 		*/
 		public function __construct($timezone = 'UTC', $lang = 'en') {
-			if (!($timezone instanceof DateTimeZone)) {
-				$this->timezone = new DateTimeZone($timezone);
+			if (!($timezone instanceof \DateTimeZone)) {
+				$this->timezone = new \DateTimeZone($timezone);
 			} else {
 				$this->timezone = $timezone;
 			}
@@ -219,12 +221,12 @@
 		* @return DateTime
 		*/
 		protected function createDate($date) {
-			if (!($date instanceof DateTime)) {
+			if (!($date instanceof \DateTime)) {
 				if (is_numeric($date)) {
-					$now = new DateTime('now', $this->timezone);
+					$now = new \DateTime('now', $this->timezone);
 					$date = $now->setTimestamp($date);
 				} else {
-					$date = new DateTime($date, $this->timezone);
+					$date = new \DateTime($date, $this->timezone);
 				}
 			} else {
 				$date = clone $date;

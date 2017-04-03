@@ -9,5 +9,15 @@
     "require": {},
     "require-dev": {
         "phpunit/phpunit": "5.1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "OneLetter\\": ["src/OneLetter"]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OneLetter\\Tests": ["tests/"]
+        }
     }
 }
