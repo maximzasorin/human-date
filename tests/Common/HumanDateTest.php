@@ -1,128 +1,182 @@
 <?php
 
-	namespace OneLetter\Tests\Common;
+namespace OneLetter\Tests\Common;
 
-	use OneLetter\Common\HumanDate;
+use OneLetter\Common\HumanDate;
 
-	class HumanDateTest extends \PHPUnit_Framework_TestCase {
-		private $timezone;
-		private $lang;
-		private $humanDate;
+/**
+ * Class for test OneLetter\Common\HumanDate.
+ */
+class HumanDateTest extends \PHPUnit_Framework_TestCase
+{
+    /**
+     * Timezone.
+     *
+     * @var \DateTimeZone
+     */
+    private $timezone;
 
-		public function setUp() {
-			$this->timezone = new \DateTimeZone('UTC');
-			$this->lang = 'en';
+    /**
+     * Language.
+     *
+     * @var string
+     */
+    private $lang;
 
-			$this->humanDate = new HumanDate($this->timezone, $this->lang);
-		}
+    /**
+     * Object of HumanDate.
+     *
+     * @var OneLetter\Common\HumanDate
+     */
+    private $humanDate;
 
-		/**
-		* Test for \DateTime, timestamps and strings
-		*
-		* @param string $date
-		* @param string $now
-		* @param string $expectedDate
-		*/
-		public function assertDateToFormat($date, $now, $expectedDate) {			
-			$dateObject = new \DateTime($date, $this->timezone);
-			$nowObject = new \DateTime($now, $this->timezone);
+    /**
+     * Set up.
+     *
+     * @return void
+     */
+    public function setUp()
+    {
+        $this->timezone = new \DateTimeZone('UTC');
+        $this->lang = 'en';
 
-			$dateTimestamp = $dateObject->getTimestamp();
-			$nowTimestamp = $nowObject->getTimestamp();
+        $this->humanDate = new HumanDate($this->timezone, $this->lang);
+    }
 
-			$formattedDateFromObjects = $this->humanDate->format($dateObject, $nowObject);
-			$formattedDateFromTimestamps = $this->humanDate->format($dateTimestamp, $nowTimestamp);
-			$formattedDateFromStrings = $this->humanDate->format($date, $now);
+    /**
+    * Test for \DateTime, timestamps and strings
+    *
+    * @param  string  $date
+    * @param  string  $now
+    * @param  string  $expectedDate
+    */
+    public function assertDateToFormat($date, $now, $expectedDate)
+    {
+        $dateObject = new \DateTime($date, $this->timezone);
+        $nowObject = new \DateTime($now, $this->timezone);
 
-			$this->assertEquals($expectedDate, $formattedDateFromObjects);
-			$this->assertEquals($expectedDate, $formattedDateFromTimestamps);
-			$this->assertEquals($expectedDate, $formattedDateFromStrings);
-		}
+        $dateTimestamp = $dateObject->getTimestamp();
+        $nowTimestamp = $nowObject->getTimestamp();
 
-		public function testWithoutSetNow() {
-			$date = new \DateTime('-6 seconds');
+        $formattedDateFromObjects = $this->humanDate->format($dateObject, $nowObject);
+        $formattedDateFromTimestamps = $this->humanDate->format($dateTimestamp, $nowTimestamp);
+        $formattedDateFromStrings = $this->humanDate->format($date, $now);
 
-			$formattedDate = $this->humanDate->format($date);
-			$expectedDate = '6 seconds ago';
+        $this->assertEquals($expectedDate, $formattedDateFromObjects);
+        $this->assertEquals($expectedDate, $formattedDateFromTimestamps);
+        $this->assertEquals($expectedDate, $formattedDateFromStrings);
+    }
 
-			$this->assertEquals($expectedDate, $formattedDate);
-		}
+    /**
+     * Test without set now.
+     *
+     * @return void
+     */
+    public function testWithoutSetNow()
+    {
+        $date = new \DateTime('-6 seconds');
 
-		public function testWithoutTimezoneAndLanguage() {
-			$date = new \DateTime('-6 seconds');
-			$humanDate = new HumanDate;
+        $formattedDate = $this->humanDate->format($date);
+        $expectedDate = '6 seconds ago';
 
-			$formattedDate = $humanDate->format($date);
-			$expectedDate = '6 seconds ago';
+        $this->assertEquals($expectedDate, $formattedDate);
+    }
 
-			$this->assertEquals($expectedDate, $formattedDate);
-		}
+    /**
+     * Test without timezone and language.
+     *
+     * @return void
+     */
+    public function testWithoutTimezoneAndLanguage()
+    {
+        $date = new \DateTime('-6 seconds');
+        $humanDate = new HumanDate;
 
-		/**
-		* Test date in past
-		*
-		* @dataProvider dataPastTime
-		*
-		* @param string $now
-		* @param string $date
-		* @param string $expected
-		*/
-		public function testPastTime($date, $now, $expected) {
-			$this->assertDateToFormat($date, $now, $expected);
-		}
+        $formattedDate = $humanDate->format($date);
+        $expectedDate = '6 seconds ago';
 
-		public function dataPastTime() {
-			return array(
-				array('2015-01-15 00:00:00', '2015-01-15 00:00:01', 'just now'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:00:06', '6 seconds ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:00:45', 'one minute ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:01:45', 'two minutes ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:02:45', 'three minutes ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:03:45', 'four minutes ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:04:45', '5 minutes ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:05:29', '5 minutes ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:05:30', '6 minutes ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 00:45:45', 'one hour ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 01:45:45', 'two hours ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 02:45:45', 'three hours ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 03:45:45', 'four hours ago'),
-				array('2015-01-15 00:00:00', '2015-01-15 04:45:46', 'today at 12:00 am'),
-				array('2015-01-15 00:00:00', '2015-01-16 04:45:46', 'yesterday at 12:00 am'),
-				array('2015-01-15 00:00:00', '2015-01-17 04:45:46', '15 Jun at 12:00 am'),
-			);
-		}
+        $this->assertEquals($expectedDate, $formattedDate);
+    }
 
-		/**
-		* Rest date in future
-		*
-		* @dataProvider dataFutureTime
-		*
-		* @param string $date
-		* @param string $now
-		* @param string $expected
-		*/
-		public function testFutureTime($date, $now, $expected) {
-			$this->assertDateToFormat($date, $now, $expected);
-		}
+    /**
+     * Test dates in past.
+     *
+     * @dataProvider dataPastTime
+     *
+     * @param  string  $now
+     * @param  string  $date
+     * @param  string  $expected
+     */
+    public function testPastTime($date, $now, $expected)
+    {
+        $this->assertDateToFormat($date, $now, $expected);
+    }
 
-		public function dataFutureTime() {
-			return array(
-				array('2015-01-15 00:00:01', '2015-01-15 00:00:00', 'right now'),
-				array('2015-01-15 00:00:06', '2015-01-15 00:00:00', 'in a 6 seconds'),
-				array('2015-01-15 00:00:45', '2015-01-15 00:00:00', 'in a one minute'),
-				array('2015-01-15 00:01:45', '2015-01-15 00:00:00', 'in a two minutes'),
-				array('2015-01-15 00:02:45', '2015-01-15 00:00:00', 'in a three minutes'),
-				array('2015-01-15 00:03:45', '2015-01-15 00:00:00', 'in a four minutes'),
-				array('2015-01-15 00:04:45', '2015-01-15 00:00:00', 'in a 5 minutes'),
-				array('2015-01-15 00:05:29', '2015-01-15 00:00:00', 'in a 5 minutes'),
-				array('2015-01-15 00:05:30', '2015-01-15 00:00:00', 'in a 6 minutes'),
-				array('2015-01-15 00:45:45', '2015-01-15 00:00:00', 'in a one hour'),
-				array('2015-01-15 01:45:45', '2015-01-15 00:00:00', 'in a two hours'),
-				array('2015-01-15 02:45:45', '2015-01-15 00:00:00', 'in a three hours'),
-				array('2015-01-15 03:45:45', '2015-01-15 00:00:00', 'in a four hours'),
-				array('2015-01-15 04:45:46', '2015-01-15 00:00:00', 'today at 4:45 am'),
-				array('2015-01-16 04:45:46', '2015-01-15 00:00:00', 'tomorrow at 4:45 am'),
-				array('2015-01-17 04:45:46', '2015-01-15 00:00:00', '17 Jun at 4:45 am'),
-			);
-		}
-	}
+    /**
+     * Data for test dates in past time.
+     *
+     * @return array
+     */
+    public function dataPastTime()
+    {
+        return array(
+            array('2015-01-15 00:00:00', '2015-01-15 00:00:01', 'just now'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:00:06', '6 seconds ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:00:45', 'one minute ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:01:45', 'two minutes ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:02:45', 'three minutes ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:03:45', 'four minutes ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:04:45', '5 minutes ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:05:29', '5 minutes ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:05:30', '6 minutes ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 00:45:45', 'one hour ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 01:45:45', 'two hours ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 02:45:45', 'three hours ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 03:45:45', 'four hours ago'),
+            array('2015-01-15 00:00:00', '2015-01-15 04:45:46', 'today at 12:00 am'),
+            array('2015-01-15 00:00:00', '2015-01-16 04:45:46', 'yesterday at 12:00 am'),
+            array('2015-01-15 00:00:00', '2015-01-17 04:45:46', '15 Jun at 12:00 am'),
+        );
+    }
+
+    /**
+     * Rest date in future
+     *
+     * @dataProvider dataFutureTime
+     *
+     * @param  string  $date
+     * @param  string  $now
+     * @param  string  $expected
+     */
+    public function testFutureTime($date, $now, $expected)
+    {
+        $this->assertDateToFormat($date, $now, $expected);
+    }
+
+    /**
+     * Data for test dates in future time.
+     *
+     * @return array
+     */
+    public function dataFutureTime()
+    {
+        return array(
+            array('2015-01-15 00:00:01', '2015-01-15 00:00:00', 'right now'),
+            array('2015-01-15 00:00:06', '2015-01-15 00:00:00', 'in a 6 seconds'),
+            array('2015-01-15 00:00:45', '2015-01-15 00:00:00', 'in a one minute'),
+            array('2015-01-15 00:01:45', '2015-01-15 00:00:00', 'in a two minutes'),
+            array('2015-01-15 00:02:45', '2015-01-15 00:00:00', 'in a three minutes'),
+            array('2015-01-15 00:03:45', '2015-01-15 00:00:00', 'in a four minutes'),
+            array('2015-01-15 00:04:45', '2015-01-15 00:00:00', 'in a 5 minutes'),
+            array('2015-01-15 00:05:29', '2015-01-15 00:00:00', 'in a 5 minutes'),
+            array('2015-01-15 00:05:30', '2015-01-15 00:00:00', 'in a 6 minutes'),
+            array('2015-01-15 00:45:45', '2015-01-15 00:00:00', 'in a one hour'),
+            array('2015-01-15 01:45:45', '2015-01-15 00:00:00', 'in a two hours'),
+            array('2015-01-15 02:45:45', '2015-01-15 00:00:00', 'in a three hours'),
+            array('2015-01-15 03:45:45', '2015-01-15 00:00:00', 'in a four hours'),
+            array('2015-01-15 04:45:46', '2015-01-15 00:00:00', 'today at 4:45 am'),
+            array('2015-01-16 04:45:46', '2015-01-15 00:00:00', 'tomorrow at 4:45 am'),
+            array('2015-01-17 04:45:46', '2015-01-15 00:00:00', '17 Jun at 4:45 am'),
+        );
+    }
+}
