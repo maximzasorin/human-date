@@ -38,21 +38,21 @@ class HumanDate
     /**
      * Constructor.
      *
-     * @param  mixed $timezone \DateTimeZone or string
-     * @param  string $lang
+     * @param  mixed  $timezone
+     * @param  string  $lang
      * @return void
      */
     public function __construct($timezone = 'UTC', $lang = 'en')
     {
-        if (!($timezone instanceof \DateTimeZone)) {
-            $this->timezone = new \DateTimeZone($timezone);
-        } else {
+        if ($timezone instanceof \DateTimeZone) {
             $this->timezone = $timezone;
+        } else {
+            $this->timezone = new \DateTimeZone($timezone);
         }
 
         $this->lang = $lang;
 
-        if (!file_exists($this->langFile())) {
+        if (!file_exists($this->getLangFile())) {
             $this->lang = 'en';
         }
 
@@ -60,12 +60,12 @@ class HumanDate
     }
 
     /**
-    * Format date for humans.
-    *
-    * @param  mixed  $date
-    * @param  DateTime  $now
-    * @return string
-    */
+     * Format date for humans.
+     *
+     * @param  mixed  $date
+     * @param  DateTime  $now
+     * @return string
+     */
     public function format($date, $now = 'now')
     {
         $date = $this->createDate($date);
@@ -81,12 +81,11 @@ class HumanDate
     }
 
     /**
-    * Return date in beauty format
-    *
-    * @param  DateTime $date
-    * @param  boolean $shortMonths
-    * @return string
-    */
+     * Return date in beauty format/
+     *
+     * @param  DateTime  $date
+     * @return string
+     */
     protected function beauty($date, $shortMonths = true)
     {
         $tomorrow = $this->isTomorrow($date);
@@ -125,13 +124,13 @@ class HumanDate
     }
 
     /**
-    * Return date in words
-    *
-    * Work for date from 0 seconds to 4 hours 45 minutes 45 seconds
-    *
-    * @param  DateTime $date
-    * @return string
-    */
+     * Return date in words.
+     *
+     * Work for date from 0 seconds to 4 hours 45 minutes 45 seconds
+     *
+     * @param  DateTime  $date
+     * @return string
+     */
     protected function words($date)
     {
         $distance = $this->distance($date);
@@ -177,82 +176,82 @@ class HumanDate
     }
 
     /**
-    * Return difference between two date in seconds
-    *
-    * @param DateTime $date
-    * @return integer
-    */
+     * Return difference between two date in seconds.
+     *
+     * @param  DateTime  $date
+     * @return integer
+     */
     protected function distance($date)
     {
         return abs($this->now()->getTimestamp() - $date->getTimestamp());
     }
 
     /**
-    * Return seconds in minute
-    *
-    * @return integer
-    */
+     * Return seconds in minute.
+     *
+     * @return integer
+     */
     protected function minute()
     {
         return 60;
     }
 
     /**
-    * Return seconds in hour
-    *
-    * @return integer
-    */
+     * Return seconds in hour.
+     *
+     * @return integer
+     */
     protected function hour()
     {
         return 3600;
     }
 
     /**
-    * Return seconds in year
-    *
-    * @return integer
-    */
+     * Return seconds in year.
+     *
+     * @return integer
+     */
     protected function year()
     {
         return 31104000;
     }
 
     /**
-    * Return now DateTime
-    *
-    * @return DateTime
-    */
+     * Return now DateTime.
+     *
+     * @return DateTime
+     */
     protected function now()
     {
         return clone $this->now;
     }
 
     /**
-    * Create DateTime object from another types
-    *
-    * @param  mixed  $date
-    * @return DateTime
-    */
+     * Create DateTime object from another types.
+     *
+     * @param  mixed  $date
+     * @return DateTime
+     */
     protected function createDate($date)
     {
-        if (!($date instanceof \DateTime)) {
+        if ($date instanceof \DateTime) {
+            $date = clone $date;
+        } else {
             if (is_numeric($date)) {
                 $now = new \DateTime('now', $this->timezone);
                 $date = $now->setTimestamp($date);
             } else {
                 $date = new \DateTime($date, $this->timezone);
             }
-        } else {
-            $date = clone $date;
         }
 
         return $date;
     }
 
     /**
-     * Return true if the date is today
+     * Return true if the date is today.
      *
-     * @param  DateTime $date
+     * @param  DateTime  $date
      * @return boolean
      */
     protected function isToday($date)
@@ -265,7 +264,7 @@ class HumanDate
     /**
      * Return true if the date is yesterday
      *
-     * @param  DateTime $date
+     * @param  DateTime  $date
      * @return boolean
      */
     protected function isYesterday($date)
@@ -278,7 +277,7 @@ class HumanDate
     /**
      * Return true if the date is tomorrow
      *
-     * @param  DateTime $date
+     * @param  DateTime  $date
      * @return boolean
      */
     protected function isTomorrow($date)
@@ -291,7 +290,7 @@ class HumanDate
     /**
      * Return true if the date is passed
      *
-     * @param  DateTime $date
+     * @param  DateTime  $date
      * @return boolean
      */
     protected function isPast($date)
@@ -322,8 +321,8 @@ class HumanDate
     /**
      * Make declension for the world
      *
-     * @param string $label
-     * @param integer $number
+     * @param  string  $label
+     * @param  integer  $number
      * @return string
      */
     protected function declension($label, $number)
@@ -340,22 +339,22 @@ class HumanDate
     }
 
     /**
-     * Return path for lang file
-     *
-     * @return string
-     */
-    protected function langFile()
-    {
-        return __DIR__ . '/lang/' . $this->lang . '.php';
-    }
-
-    /**
-     * Load translations from file
+     * Load translations from file.
      *
      * @return void
      */
     protected function loadTranslations()
     {
-        $this->translations = require($this->langFile());
+        $this->translations = require($this->getLangFile());
+    }
+
+    /**
+     * Return path for lang file.
+     *
+     * @return string
+     */
+    protected function getLangFile()
+    {
+        return __DIR__ . '/lang/' . $this->lang . '.php';
     }
 }

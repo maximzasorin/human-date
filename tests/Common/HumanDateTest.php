@@ -44,12 +44,12 @@ class HumanDateTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-    * Test for \DateTime, timestamps and strings
-    *
-    * @param  string  $date
-    * @param  string  $now
-    * @param  string  $expectedDate
-    */
+     * Test for \DateTime, timestamps and strings
+     *
+     * @param  string  $date
+     * @param  string  $now
+     * @param  string  $expectedDate
+     */
     public function assertDateToFormat($date, $now, $expectedDate)
     {
         $dateObject = new \DateTime($date, $this->timezone);

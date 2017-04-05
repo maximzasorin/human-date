@@ -4,7 +4,7 @@
  * Translations for English.
  */
 return [
-    'shortMonths' => [ 'Jun', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sen', 'Oct', 'Nov', 'Dec'],
+    'shortMonths' => ['Jun', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     'time' => 'g:i a',
 
     'justNow' => 'just now', // Past
