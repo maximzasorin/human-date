@@ -11,15 +11,15 @@ use OneLetter\Common\HumanDate;
 
 $humanDate = new HumanDate('UTC', 'en');
 
-$humanDate->format(new DateTime('-1 day')); // yesterday at 3:18 pm
-$humanDate->format(new DateTime('-5 hours')); // today at 10:18 am
-$humanDate->format(new DateTime('-50 minutes')); // one hour ago
-$humanDate->format(new DateTime('-4 seconds')); // just now
+$humanDate->format(new \DateTime('-1 day')); // yesterday at 3:18 pm
+$humanDate->format(new \DateTime('-5 hours')); // today at 10:18 am
+$humanDate->format(new \DateTime('-50 minutes')); // one hour ago
+$humanDate->format(new \DateTime('-4 seconds')); // just now
 
-$humanDate->format(new DateTime('+1 day')); // tomorrow at 3:18 pm
-$humanDate->format(new DateTime('+5 hours')); // today at 8:18 pm
-$humanDate->format(new DateTime('+50 minutes')); // one hour ago
-$humanDate->format(new DateTime('+4 seconds')); // just now
+$humanDate->format(new \DateTime('+1 day')); // tomorrow at 3:18 pm
+$humanDate->format(new \DateTime('+5 hours')); // today at 8:18 pm
+$humanDate->format(new \DateTime('+50 minutes')); // one hour ago
+$humanDate->format(new \DateTime('+4 seconds')); // just now
 ```
 
 ## Intervals
@@ -63,5 +63,7 @@ Class distinguishes in past and in future results, all possible results of class
 | tomorrow                                                    | tomorrow at xx:xx       |
 
 ## Tests
+
+For tests run:
 
 ```$ vendor/bin/phpunit tests/```

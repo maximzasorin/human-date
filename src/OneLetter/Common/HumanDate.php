@@ -3,12 +3,12 @@
 namespace OneLetter\Common;
 
 /**
- * Class for format date (like VK.com).
+ * Class for format date.
  */
 class HumanDate
 {
     /**
-     * Timezone.
+     * Base timezone for passed dates as string.
      *
      * @var \DateTimeZone
      */
