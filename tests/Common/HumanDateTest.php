@@ -7,7 +7,7 @@ use OneLetter\Common\HumanDate;
 /**
  * Class for test OneLetter\Common\HumanDate.
  */
-class HumanDateTest extends \PHPUnit_Framework_TestCase
+class HumanDateTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * Timezone.

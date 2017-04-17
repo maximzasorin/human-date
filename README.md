@@ -43,6 +43,8 @@ Class distinguishes in past and in future results, all possible results of class
 | 3 hour 45 minutes 45 seconds – 4 hour 45 minutes 44 seconds | four hours ago         |
 | today > 4 hour 45 minutes 45 seconds                        | today at xx:xx         |
 | yesterday                                                   | yesterday at xx:xx     |
+| > yesterday                                                 | xx xx at xx:xx         |
+| > year                                                      | xx xx xxxx at xx:xx    |
 
 ## Future
 
@@ -61,6 +63,8 @@ Class distinguishes in past and in future results, all possible results of class
 | 3 hour 45 minutes 45 seconds – 4 hour 45 minutes 44 seconds | in a four hours         |
 | today > 4 hour 45 minutes 45 seconds                        | today at xx:xx          |
 | tomorrow                                                    | tomorrow at xx:xx       |
+| > tomorrow                                                  | xx xx at xx:xx          |
+| > year                                                      | xx xx xxxx at xx:xx     |
 
 ## Tests
 
