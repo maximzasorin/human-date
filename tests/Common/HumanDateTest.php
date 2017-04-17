@@ -26,7 +26,7 @@ class HumanDateTest extends \PHPUnit_Framework_TestCase
     /**
      * Object of HumanDate.
      *
-     * @var OneLetter\Common\HumanDate
+     * @var Oneletter\Common\HumanDate
      */
     private $humanDate;
 
@@ -74,9 +74,9 @@ class HumanDateTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithoutSetNow()
     {
-        $date = new \DateTime('-6 seconds');
+        $humanDate = new HumanDate($this->timezone, $this->lang);
 
-        $formattedDate = $this->humanDate->format($date);
+        $formattedDate = $humanDate->format(new \DateTime('-6 seconds'));
         $expectedDate = '6 seconds ago';
 
         $this->assertEquals($expectedDate, $formattedDate);
@@ -89,13 +89,92 @@ class HumanDateTest extends \PHPUnit_Framework_TestCase
      */
     public function testWithoutTimezoneAndLanguage()
     {
-        $date = new \DateTime('-6 seconds');
         $humanDate = new HumanDate;
 
-        $formattedDate = $humanDate->format($date);
+        $formattedDate = $humanDate->format(new \DateTime('-6 seconds'));
         $expectedDate = '6 seconds ago';
 
         $this->assertEquals($expectedDate, $formattedDate);
+    }
+
+    /**
+     * Test short months.
+     *
+     * @dataProvider dataShortMonths
+     *
+     * @param  string  $now
+     * @param  string  $date
+     * @param  string  $expected
+     */
+    public function testShortMonths($date, $now, $expected)
+    {
+        $this->humanDate
+            ->shortMonths(true);
+
+        $this->assertDateToFormat($date, $now, $expected);
+    }
+
+    /**
+     * Data for test short months.
+     *
+     * @return array
+     */
+    public function dataShortMonths()
+    {
+        return array(
+            array('2015-01-15 00:00:00', '2015-01-01 00:00:00', '15 Jan at 12:00 am'),
+            array('2015-02-15 00:00:00', '2015-01-01 00:00:00', '15 Feb at 12:00 am'),
+            array('2015-03-15 00:00:00', '2015-01-01 00:00:00', '15 Mar at 12:00 am'),
+            array('2015-04-15 00:00:00', '2015-01-01 00:00:00', '15 Apr at 12:00 am'),
+            array('2015-05-15 00:00:00', '2015-01-01 00:00:00', '15 May at 12:00 am'),
+            array('2015-06-15 00:00:00', '2015-01-01 00:00:00', '15 Jun at 12:00 am'),
+            array('2015-07-15 00:00:00', '2015-01-01 00:00:00', '15 Jul at 12:00 am'),
+            array('2015-08-15 00:00:00', '2015-01-01 00:00:00', '15 Aug at 12:00 am'),
+            array('2015-09-15 00:00:00', '2015-01-01 00:00:00', '15 Sep at 12:00 am'),
+            array('2015-10-15 00:00:00', '2015-01-01 00:00:00', '15 Oct at 12:00 am'),
+            array('2015-11-15 00:00:00', '2015-01-01 00:00:00', '15 Nov at 12:00 am'),
+            array('2015-12-15 00:00:00', '2015-01-01 00:00:00', '15 Dec at 12:00 am'),
+        );
+    }
+
+    /**
+     * Test months.
+     *
+     * @dataProvider dataMonths
+     *
+     * @param  string  $now
+     * @param  string  $date
+     * @param  string  $expected
+     */
+    public function testMonths($date, $now, $expected)
+    {
+        $this->humanDate
+            ->shortMonths(false);
+
+        $this->assertDateToFormat($date, $now, $expected);
+    }
+
+    /**
+     * Data for test months.
+     *
+     * @return array
+     */
+    public function dataMonths()
+    {
+        return array(
+            array('2015-01-15 00:00:00', '2015-01-01 00:00:00', '15 January at 12:00 am'),
+            array('2015-02-15 00:00:00', '2015-01-01 00:00:00', '15 February at 12:00 am'),
+            array('2015-03-15 00:00:00', '2015-01-01 00:00:00', '15 March at 12:00 am'),
+            array('2015-04-15 00:00:00', '2015-01-01 00:00:00', '15 April at 12:00 am'),
+            array('2015-05-15 00:00:00', '2015-01-01 00:00:00', '15 May at 12:00 am'),
+            array('2015-06-15 00:00:00', '2015-01-01 00:00:00', '15 June at 12:00 am'),
+            array('2015-07-15 00:00:00', '2015-01-01 00:00:00', '15 July at 12:00 am'),
+            array('2015-08-15 00:00:00', '2015-01-01 00:00:00', '15 August at 12:00 am'),
+            array('2015-09-15 00:00:00', '2015-01-01 00:00:00', '15 September at 12:00 am'),
+            array('2015-10-15 00:00:00', '2015-01-01 00:00:00', '15 October at 12:00 am'),
+            array('2015-11-15 00:00:00', '2015-01-01 00:00:00', '15 November at 12:00 am'),
+            array('2015-12-15 00:00:00', '2015-01-01 00:00:00', '15 December at 12:00 am'),
+        );
     }
 
     /**
@@ -135,7 +214,7 @@ class HumanDateTest extends \PHPUnit_Framework_TestCase
             array('2015-01-15 00:00:00', '2015-01-15 03:45:45', 'four hours ago'),
             array('2015-01-15 00:00:00', '2015-01-15 04:45:46', 'today at 12:00 am'),
             array('2015-01-15 00:00:00', '2015-01-16 04:45:46', 'yesterday at 12:00 am'),
-            array('2015-01-15 00:00:00', '2015-01-17 04:45:46', '15 Jun at 12:00 am'),
+            array('2015-01-15 00:00:00', '2015-01-17 04:45:46', '15 Jan at 12:00 am'),
         );
     }
 
@@ -176,7 +255,7 @@ class HumanDateTest extends \PHPUnit_Framework_TestCase
             array('2015-01-15 03:45:45', '2015-01-15 00:00:00', 'in a four hours'),
             array('2015-01-15 04:45:46', '2015-01-15 00:00:00', 'today at 4:45 am'),
             array('2015-01-16 04:45:46', '2015-01-15 00:00:00', 'tomorrow at 4:45 am'),
-            array('2015-01-17 04:45:46', '2015-01-15 00:00:00', '17 Jun at 4:45 am'),
+            array('2015-01-17 04:45:46', '2015-01-15 00:00:00', '17 Jan at 4:45 am'),
         );
     }
 }

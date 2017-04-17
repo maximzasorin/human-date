@@ -36,6 +36,13 @@ class HumanDate
     protected $now;
 
     /**
+     * Use short months.
+     *
+     * @var boolean
+     */
+    protected $shortMonths = true;
+
+    /**
      * Constructor.
      *
      * @param  mixed  $timezone
@@ -81,12 +88,25 @@ class HumanDate
     }
 
     /**
+     * shortMonths property.
+     *
+     * @param  boolean $shortMonths
+     * @return self
+     */
+    public function shortMonths($shortMonths)
+    {
+        $this->shortMonths = $shortMonths;
+
+        return $this;
+    }
+
+    /**
      * Return date in beauty format/
      *
      * @param  DateTime  $date
      * @return string
      */
-    protected function beauty($date, $shortMonths = true)
+    protected function beauty($date)
     {
         $tomorrow = $this->isTomorrow($date);
 
@@ -104,7 +124,7 @@ class HumanDate
             // Month
             $month = $date->format('m');
 
-            if ($shortMonths) {
+            if ($this->shortMonths) {
                 $beauty .= ' ' . $this->translation('shortMonths', $month - 1);
             } else {
                 $beauty .= ' ' . $this->translation('months', $month - 1);
