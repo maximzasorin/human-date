@@ -101,7 +101,20 @@ class HumanDate
     }
 
     /**
-     * Return date in beauty format/
+     * Set translation.
+     *
+     * @param  array  $translation
+     * @return self
+     */
+    public function translation($translation)
+    {
+        $this->translation = $translation;
+
+        return $this;
+    }
+
+    /**
+     * Return date in beauty format.
      *
      * @param  DateTime  $date
      * @return string
@@ -146,7 +159,7 @@ class HumanDate
     /**
      * Return date in words.
      *
-     * Work for date from 0 seconds to 4 hours 45 minutes 45 seconds
+     * Work for date from 0 seconds to 4 hours 45 minutes 45 seconds.
      *
      * @param  DateTime  $date
      * @return string
@@ -282,7 +295,7 @@ class HumanDate
     }
 
     /**
-     * Return true if the date is yesterday
+     * Return true if the date is yesterday.
      *
      * @param  DateTime  $date
      * @return boolean
@@ -295,7 +308,7 @@ class HumanDate
     }
 
     /**
-     * Return true if the date is tomorrow
+     * Return true if the date is tomorrow.
      *
      * @param  DateTime  $date
      * @return boolean
@@ -308,7 +321,7 @@ class HumanDate
     }
 
     /**
-     * Return true if the date is passed
+     * Return true if the date is passed.
      *
      * @param  DateTime  $date
      * @return boolean
@@ -319,7 +332,7 @@ class HumanDate
     }
 
     /**
-     * Return word from translation file
+     * Return word from translation file.
      *
      * @param  string  $label
      * @param  integer  $index
@@ -339,7 +352,7 @@ class HumanDate
     }
 
     /**
-     * Make declension for the world
+     * Make declension for the world.
      *
      * @param  string  $label
      * @param  integer  $number
