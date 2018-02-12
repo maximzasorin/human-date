@@ -10,7 +10,7 @@ composer require oneletter/human-date
 
 ## Usage
 
-```
+```php
 <?php
 
 use OneLetter\Common\HumanDate;
