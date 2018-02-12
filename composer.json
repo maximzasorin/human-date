@@ -1,5 +1,5 @@
 {
-    "name": "maximzasorin/human-date",
+    "name": "oneletter/human-date",
     "license": "MIT",
     "authors": [
         {
@@ -20,5 +20,8 @@
         "psr-4": {
             "OneLetter\\Tests\\": ["tests/"]
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit tests/"
     }
 }

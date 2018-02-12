@@ -70,7 +70,7 @@ Class distinguishes in past and in future results, all possible results of class
 
 For tests run:
 
-```$ vendor/bin/phpunit tests/```
+```$ composer run test```
 
 ## License
 
