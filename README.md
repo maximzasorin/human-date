@@ -2,6 +2,12 @@
 
 Class for formatting date intervals.
 
+## Install
+
+```
+composer require oneletter/human-date
+````
+
 ## Usage
 
 ```
