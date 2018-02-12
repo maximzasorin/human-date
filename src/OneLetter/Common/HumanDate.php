@@ -78,7 +78,7 @@ class HumanDate
         $date = $this->createDate($date);
         $this->now = $this->createDate($now);
 
-        if ($this->distance($date) > 4 * $this->hour() + 45 * $this->minute() + 45) {
+        if ($this->getDistance($date) > 4 * $this->hour() + 45 * $this->minute() + 45) {
             $humanDate = $this->beauty($date);
         } else {
             $humanDate = $this->words($date);
@@ -101,14 +101,14 @@ class HumanDate
     }
 
     /**
-     * Set translation.
+     * Set translations.
      *
-     * @param  array  $translation
+     * @param  array  $translations
      * @return self
      */
-    public function translation($translation)
+    public function translations($translations)
     {
-        $this->translation = $translation;
+        $this->translations = $translations;
 
         return $this;
     }
@@ -125,11 +125,11 @@ class HumanDate
 
         // Simple date
         if ($this->isToday($date)) {
-            $beauty = $this->translation('today');
+            $beauty = $this->translate('today');
         } elseif ($this->isYesterday($date)) {
-            $beauty = $this->translation('yesterday');
+            $beauty = $this->translate('yesterday');
         } elseif ($tomorrow) {
-            $beauty = $this->translation('tomorrow');
+            $beauty = $this->translate('tomorrow');
         } else {
             // Day
             $beauty = $date->format('j');
@@ -138,20 +138,20 @@ class HumanDate
             $month = $date->format('m');
 
             if ($this->shortMonths) {
-                $beauty .= ' ' . $this->translation('shortMonths', $month - 1);
+                $beauty .= ' ' . $this->translate('shortMonths', $month - 1);
             } else {
-                $beauty .= ' ' . $this->translation('months', $month - 1);
+                $beauty .= ' ' . $this->translate('months', $month - 1);
             }
 
             // Year
-            if ($this->distance($date) > $this->year()) {
+            if ($this->getDistance($date) > $this->year()) {
                 $beauty .= ' ' . $date->format('y');
             }
         }
 
         // Time
-        $beauty .= ' ' . $this->translation('delimiter');
-        $beauty .= ' ' . $date->format($this->translation('time'));
+        $beauty .= ' ' . $this->translate('delimiter');
+        $beauty .= ' ' . $date->format($this->translate('time'));
 
         return $beauty;
     }
@@ -166,42 +166,42 @@ class HumanDate
      */
     protected function words($date)
     {
-        $distance = $this->distance($date);
+        $distance = $this->getDistance($date);
 
         if ($distance < 5) {
             if ($this->isPast($date)) {
-                $words = $this->translation('justNow');
+                $words = $this->translate('justNow');
             } else {
-                $words = $this->translation('rightNow');
+                $words = $this->translate('rightNow');
             }
         } else {
             if ($distance < 45) {
-                $words = $this->declension('seconds', $distance);
+                $words = $this->decline('seconds', $distance);
             } elseif ($distance < 1 * $this->minute() + 45) {
-                $words = $this->translation('oneMinute');
+                $words = $this->translate('oneMinute');
             } elseif ($distance < 2 * $this->minute() + 45) {
-                $words = $this->translation('twoMinutes');
+                $words = $this->translate('twoMinutes');
             } elseif ($distance < 3 * $this->minute() + 45) {
-                $words = $this->translation('threeMinutes');
+                $words = $this->translate('threeMinutes');
             } elseif ($distance < 4 * $this->minute() + 45) {
-                $words = $this->translation('fourMinutes');
+                $words = $this->translate('fourMinutes');
             } elseif ($distance < 45 * $this->minute() + 45) {
                 $minutes = round($distance / $this->minute());
-                $words = $this->declension('minutes', $minutes);
+                $words = $this->decline('minutes', $minutes);
             } elseif ($distance < 1 * $this->hour() + 45 * $this->minute() + 45) {
-                $words = $this->translation('oneHour');
+                $words = $this->translate('oneHour');
             } elseif ($distance < 2 * $this->hour() + 45 * $this->minute() + 45) {
-                $words = $this->translation('twoHours');
+                $words = $this->translate('twoHours');
             } elseif ($distance < 3 * $this->hour() + 45 * $this->minute() + 45) {
-                $words = $this->translation('threeHours');
+                $words = $this->translate('threeHours');
             } elseif ($distance <= 4 * $this->hour() + 45 * $this->minute() + 45) {
-                $words = $this->translation('fourHours');
+                $words = $this->translate('fourHours');
             }
 
             if ($this->isPast($date)) {
-                $words .= ' ' . $this->translation('ago');
+                $words .= ' ' . $this->translate('ago');
             } else {
-                $words = $this->translation('after') . ' ' . $words;
+                $words = $this->translate('after') . ' ' . $words;
             }
         }
 
@@ -214,7 +214,7 @@ class HumanDate
      * @param  DateTime  $date
      * @return integer
      */
-    protected function distance($date)
+    protected function getDistance($date)
     {
         return abs($this->now()->getTimestamp() - $date->getTimestamp());
     }
@@ -338,7 +338,7 @@ class HumanDate
      * @param  integer  $index
      * @return string
      */
-    protected function translation($label, $index = 0)
+    protected function translate($label, $index = 0)
     {
         if (!array_key_exists($label, $this->translations)) {
             return '';
@@ -352,23 +352,23 @@ class HumanDate
     }
 
     /**
-     * Make declension for the world.
+     * Make decline for the world.
      *
      * @param  string  $label
      * @param  integer  $number
      * @return string
      */
-    protected function declension($label, $number)
+    protected function decline($label, $number)
     {
-        $declensionFunc = $this->translation('declension');
+        $declineFunc = $this->translate('decline');
 
-        if ($declensionFunc) {
-            $index = $declensionFunc($number);
+        if ($declineFunc) {
+            $index = $declineFunc($number);
         } else {
             $index = 0;
         }
 
-        return $number . ' ' . $this->translation($label, $index);
+        return $number . ' ' . $this->translate($label, $index);
     }
 
     /**
